@@ -18,9 +18,15 @@ jobs:
     - name: Build with Maven
       run: mvn clean install
 
-    - name: Run Docker Build
+    - name: Build Docker Image
       run: docker build . -t cloud-usage-app
 
-    - name: Run Assessment Image
+    - name: Run Docker Container
       run: |
-        docker run -d -p 808
+        docker run -d -p 8080:8080 cloud-usage-app
+    
+    - name: Verify Docker Container is Running
+      run: docker ps | grep cloud-usage-app
+
+    - name: Clean up Docker (optional)
+      run: docker system prune -f
