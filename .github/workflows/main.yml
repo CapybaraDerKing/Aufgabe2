@@ -13,11 +13,7 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
 
-    - name: Log in to Docker Hub
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }} # DockerHub Username als Secret hinzufügen
-        password: ${{ secrets.DOCKER_PASSWORD }} # DockerHub Password als Secret hinzufügen
+    
 
     - name: Build Docker Images
       run: docker-compose build
