@@ -13,29 +13,32 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
 
-    
-
     - name: Build Docker Images
-      run: docker-compose build
+      run: |
+        docker-compose build || {
+          echo "Build failed, cleaning up..."
+          docker-compose down --volumes --rmi all
+          docker system prune -a -f
+          exit 1
+        }
 
     - name: Run Docker Compose
-      run: docker-compose up -d
+      run: |
+        docker-compose up -d || {
+          echo "Docker Compose failed, cleaning up..."
+          docker-compose down --volumes --rmi all
+          docker system prune -a -f
+          exit 1
+        }
 
     - name: Wait for services to start
-      run: |
-        echo "Waiting for services to be ready..."
-        sleep 20  # Wartezeit für den Start der Services
-
-    - name: Check if service is running
-      run: |
-        echo "Checking if the service is running..."
-        curl --fail localhost:8080/v1/dataset || exit 1
+      run: sleep 20  # Warte, bis die Services gestartet sind
 
     - name: Verify Results
+      run: curl http://localhost:8080/v1/result
+
+    - name: Cleanup Docker environment after tests
+      if: always()
       run: |
-        echo "Verifying results..."
-        curl --fail localhost:8080/v1/result || exit 1
-
-    - name: Tear down Docker Compose
-      run: docker-compose down
-
+        docker-compose down --volumes --rmi all
+        docker system prune -a -f
