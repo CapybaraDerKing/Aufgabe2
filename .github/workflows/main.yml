@@ -1,32 +1,26 @@
-name: Test Java CloudUsageApp with Maven
+name: Test Application
 
 on: [push]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Check out the repository
+    - name: Checkout Repository
       uses: actions/checkout@v2
 
-    - name: Set up JDK 17
-      uses: actions/setup-java@v1
-      with:
-        java-version: '17'
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
 
-    - name: Build with Maven
-      run: mvn clean install
+    - name: Build Docker Images
+      run: docker-compose build
 
-    - name: Build Docker Image
-      run: docker build . -t cloud-usage-app
+    - name: Run Docker Compose
+      run: docker-compose up -d
 
-    - name: Run Docker Container
-      run: |
-        docker run -d -p 8080:8080 cloud-usage-app
-    
-    - name: Verify Docker Container is Running
-      run: docker ps | grep cloud-usage-app
+    - name: Wait for services to start
+      run: sleep 20  # Warte, bis die Services gestartet sind
 
-    - name: Clean up Docker (optional)
-      run: docker system prune -f
+    - name: Verify Results
+      run: curl localhost:8080/v1/result

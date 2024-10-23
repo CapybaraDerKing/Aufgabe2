@@ -1,8 +1,14 @@
 version: '3'
 services:
-  app:
-    build: .
+  assessment:
+    image: mrksdh/assessment
     ports:
       - "8080:8080"
+
+  calculator:
+    build: ./calculator
+    depends_on:
+      - assessment
     environment:
-      - API_URL=http://app:8080/v1/datasetLeistungsnachweis # Wenn die API im selben Docker-Compose-Netzwerk läuft
+      ASSESSMENT_URL: http://assessment:8080/v1/dataset
+      RESULT_URL: http://assessment:8080/v1/result
